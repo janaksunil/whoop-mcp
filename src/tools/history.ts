@@ -94,7 +94,7 @@ export function registerHistoryTools(
 
         // Fetch data for each day
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          const dateStr = d.toISOString().split("T")[0];
+          const dateStr = d.toISOString().split("T")[0] ?? "";
           try {
             const data = await whoopClient.getHomeData(dateStr);
             const live = data.metadata?.whoop_live_metadata;
@@ -112,8 +112,8 @@ export function registerHistoryTools(
               dailyData.push(dayData);
 
               // Track weekday patterns
-              const dayOfWeek = weekdays[new Date(dateStr).getDay()];
-              if (live.recovery_score != null) {
+              const dayOfWeek = weekdays[new Date(dateStr).getDay()] as string;
+              if (live.recovery_score != null && dayOfWeek && weekdayTotals[dayOfWeek]) {
                 weekdayTotals[dayOfWeek].sum += live.recovery_score;
                 weekdayTotals[dayOfWeek].count += 1;
               }
