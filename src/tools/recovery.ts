@@ -31,10 +31,10 @@ export function registerRecoveryTools(
           z.object({
             id: z.string(),
             title: z.string(),
-            value: z.string(),
-            baseline: z.string(),
-            status: z.string(),
-            icon: z.string(),
+            value: z.string().nullable(),
+            baseline: z.string().nullable(),
+            status: z.string().nullable(),
+            icon: z.string().nullable(),
           })
         ),
         coachInsight: z.string().nullable(),
@@ -112,8 +112,8 @@ export function registerRecoveryTools(
 
           lines.push(
             `  ${statusEmoji} ${contributor.title}`,
-            `     Current: ${contributor.value}`,
-            `     Baseline (30-day): ${contributor.baseline}`,
+            `     Current: ${contributor.value ?? "N/A"}`,
+            `     Baseline (30-day): ${contributor.baseline ?? "N/A"}`,
             ""
           );
         });
