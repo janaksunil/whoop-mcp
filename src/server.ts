@@ -5,6 +5,8 @@ import { registerSleepTools } from "./tools/sleep";
 import { registerRecoveryTools } from "./tools/recovery";
 import { registerStrainTools } from "./tools/strain";
 import { registerHealthspanTools } from "./tools/healthspan";
+import { registerHistoryTools } from "./tools/history";
+import { registerTrendsTools } from "./tools/trends";
 
 export interface WhoopMcpServerConfig {
   email?: string;
@@ -24,6 +26,8 @@ export function createWhoopMcpServer(config: WhoopMcpServerConfig) {
   registerRecoveryTools(server, whoopClient);
   registerStrainTools(server, whoopClient);
   registerHealthspanTools(server, whoopClient);
+  registerHistoryTools(server, whoopClient);
+  registerTrendsTools(server, whoopClient);
 
   return server;
 }
