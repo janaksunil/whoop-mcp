@@ -58,7 +58,7 @@ export function registerHomeTools(server: McpServer, whoopClient: WhoopClient) {
           z.object({
             title: z.string(),
             currentValue: z.string(),
-            thirtyDayAverage: z.string(),
+            thirtyDayAverage: z.string().nullable(),
             state: z.string(),
           })
         ),
@@ -189,7 +189,7 @@ export function registerHomeTools(server: McpServer, whoopClient: WhoopClient) {
             lines.push(
               `  ${stateEmoji} ${stat.title}`,
               `     Current: ${stat.currentValue}`,
-              `     30-day avg: ${stat.thirtyDayAverage}`,
+              `     30-day avg: ${stat.thirtyDayAverage ?? "N/A"}`,
               ""
             );
           });

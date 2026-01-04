@@ -1,11 +1,13 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "whoop-mcp",
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.20.2",
         "express": "^5.1.0",
+        "zod": "^3.24.1",
       },
       "devDependencies": {
         "@types/bun": "latest",
