@@ -7,6 +7,7 @@ import { registerStrainTools } from "./tools/strain";
 import { registerHealthspanTools } from "./tools/healthspan";
 import { registerHistoryTools } from "./tools/history";
 import { registerTrendsTools } from "./tools/trends";
+import { registerMonthlyTools } from "./tools/monthly";
 
 export interface WhoopMcpServerConfig {
   email?: string;
@@ -28,6 +29,7 @@ export function createWhoopMcpServer(config: WhoopMcpServerConfig) {
   registerHealthspanTools(server, whoopClient);
   registerHistoryTools(server, whoopClient);
   registerTrendsTools(server, whoopClient);
+  registerMonthlyTools(server, whoopClient);
 
   return server;
 }

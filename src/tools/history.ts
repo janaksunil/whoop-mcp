@@ -49,6 +49,8 @@ export function registerHistoryTools(
             strain: z.number().nullable(),
             sleepHours: z.number().nullable(),
             calories: z.number().nullable(),
+            hrv: z.number().nullable(),
+            rhr: z.number().nullable(),
           })
         ),
         weekdayPatterns: z.object({
@@ -99,6 +101,31 @@ export function registerHistoryTools(
             const data = await whoopClient.getHomeData(dateStr);
             const live = data.metadata?.whoop_live_metadata;
 
+            // Also fetch recovery deep dive for HRV and RHR
+            let hrv: number | null = null;
+            let rhr: number | null = null;
+            try {
+              const recoveryData = await whoopClient.getRecoveryDeepDive(dateStr);
+              const contributorsSection = recoveryData.sections?.find((s: any) =>
+                s.items?.some((i: any) => i.type === "CONTRIBUTORS_TILE")
+              );
+              const contributorsTile = contributorsSection?.items?.find(
+                (i: any) => i.type === "CONTRIBUTORS_TILE"
+              )?.content;
+
+              if (contributorsTile?.metrics) {
+                for (const metric of contributorsTile.metrics) {
+                  if (metric.id === "CONTRIBUTORS_TILE_HRV") {
+                    hrv = parseFloat(metric.status) || null;
+                  } else if (metric.id === "CONTRIBUTORS_TILE_RHR") {
+                    rhr = parseFloat(metric.status) || null;
+                  }
+                }
+              }
+            } catch {
+              // Recovery data not available, continue with nulls
+            }
+
             if (live) {
               const dayData = {
                 date: dateStr,
@@ -108,6 +135,8 @@ export function registerHistoryTools(
                   ? live.ms_of_sleep / (1000 * 60 * 60)
                   : null,
                 calories: live.calories ?? null,
+                hrv,
+                rhr,
               };
               dailyData.push(dayData);
 
@@ -126,17 +155,21 @@ export function registerHistoryTools(
               strain: null,
               sleepHours: null,
               calories: null,
+              hrv: null,
+              rhr: null,
             });
           }
 
           // Small delay to avoid rate limiting
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 150));
         }
 
         // Calculate averages
         const validRecovery = dailyData.filter((d) => d.recoveryScore != null);
         const validStrain = dailyData.filter((d) => d.strain != null);
         const validSleep = dailyData.filter((d) => d.sleepHours != null);
+        const validHrv = dailyData.filter((d) => d.hrv != null);
+        const validRhr = dailyData.filter((d) => d.rhr != null);
 
         const averages = {
           recoveryScore:
@@ -162,8 +195,18 @@ export function registerHistoryTools(
                     10
                 ) / 10
               : null,
-          hrv: null, // Would need deep dive data for each day
-          restingHeartRate: null,
+          hrv:
+            validHrv.length > 0
+              ? Math.round(
+                  validHrv.reduce((a, b) => a + b.hrv, 0) / validHrv.length
+                )
+              : null,
+          restingHeartRate:
+            validRhr.length > 0
+              ? Math.round(
+                  validRhr.reduce((a, b) => a + b.rhr, 0) / validRhr.length
+                )
+              : null,
         };
 
         // Calculate weekday averages
@@ -255,6 +298,8 @@ export function registerHistoryTools(
           `  Recovery: ${averages.recoveryScore ?? "N/A"}%`,
           `  Strain: ${averages.strain ?? "N/A"}`,
           `  Sleep: ${averages.sleepHours ?? "N/A"} hours`,
+          `  HRV: ${averages.hrv ?? "N/A"} ms`,
+          `  Resting HR: ${averages.restingHeartRate ?? "N/A"} bpm`,
           "",
           "📅 WEEKDAY PATTERNS",
           "───────────────────",
